@@ -31,7 +31,44 @@ class CreateSupplier(graphene.Mutation):
         supplier.save()
         return CreateSupplier(supplier=supplier)
 
+class UpdateSupplier(graphene.Mutation):
+    class Arguments:
+       id = graphene.ID()
+       name = graphene.String()
+       notes = graphene.String()
+
+    supplier = graphene.Field(SupplierType)
+
+    @staticmethod
+    def mutate(root, info, **kwargs):
+
+        supplier_instance = Supplier.objects.get(pk=kwargs.get('id'))
+
+        if supplier_instance:
+            supplier_instance.name = kwargs.get('name')
+            supplier_instance.notes = kwargs.get('notes')
+            supplier_instance.save()
+
+            return UpdateSupplier(supplier=supplier_instance)
+        return UpdateSupplier(book=None)
+
+class DeleteSupplier(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID()
+
+    supplier = graphene.Field(SupplierType)
+
+    @staticmethod
+    def mutate(root, info, id):
+        supplier_instance = Supplier.objects.get(pk=id)
+        supplier_instance.delete()
+
+        return None
+
+
 class Mutation(graphene.ObjectType):
     create_supplier = CreateSupplier.Field()
+    update_supplier = UpdateSupplier.Field()
+    delete_supplier = DeleteSupplier.Field()
 
 schema = graphene.Schema(query=Query)
